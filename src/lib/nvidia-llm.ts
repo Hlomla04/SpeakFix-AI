@@ -42,7 +42,7 @@ export function getNvidiaClient(): OpenAI {
     // system prompt is long (~2k tokens of context + history). 90s gives
     // the model enough time to think (reasoning_content) AND respond
     // (content) without timing out.
-    timeout: 90_000,
+    timeout: 6_000,
     maxRetries: 1,
   });
   return client;

@@ -29,7 +29,7 @@ import { getUserFromRequest } from "@/lib/auth";
  * Input length: max 1024 chars per request (z-ai API limit). We slice to 1000
  * for safety; long replies should already be chunked by the caller.
  */
-export const maxDuration = 30;
+export const maxDuration = 10;
 
 const DEFAULT_VOICE = process.env.SPEAKFIX_TTS_VOICE || "tongtong";
 const VALID_VOICES = new Set(["tongtong", "chuichui", "xiaochen", "jam", "kazi", "douji", "luodo"]);

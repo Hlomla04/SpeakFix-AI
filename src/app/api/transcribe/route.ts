@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import ZAI from "z-ai-web-dev-sdk";
 
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 /**
  * POST /api/transcribe

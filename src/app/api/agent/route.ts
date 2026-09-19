@@ -20,7 +20,7 @@ import {
   type TicketFields,
 } from "@/lib/types";
 
-export const maxDuration = 120;
+export const maxDuration = 10;
 
 interface AgentRequestBody {
   mode?: "report" | "resolve";
