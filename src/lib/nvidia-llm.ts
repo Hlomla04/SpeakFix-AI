@@ -73,28 +73,26 @@ export async function nvidiaChatCompletion(
   messages: { role: "system" | "user" | "assistant"; content: string }[],
   opts: { temperature?: number; maxTokens?: number } = {}
 ): Promise<string> {
+  const isVercel = Boolean(process.env.VERCEL);
+  if (isVercel) {
+    return fallbackZaiChat(messages);
+  }
+
   const openai = getNvidiaClient();
   try {
     const completion = await openai.chat.completions.create({
       model: NVIDIA_MODEL,
       messages,
       temperature: opts.temperature ?? 0.5,
-      // Default 4096 — leaves room for both the reasoning_content AND the
-      // final content answer. The SpeakFix system prompt is ~2k tokens on
-      // its own, so the model needs plenty of room to think AND respond.
-      // Callers can override per-call if they need more or less.
-      max_tokens: opts.maxTokens ?? 4096,
+      max_tokens: opts.maxTokens ?? 2048,
       top_p: 1,
       stream: false,
     });
     const content = completion.choices[0]?.message?.content ?? "";
     if (content.trim()) return content;
-    // Empty content but no error → likely the model ran out of tokens
-    // during reasoning. Fall through to the fallback.
     console.warn("[nvidia-llm] empty content, falling back to z-ai SDK");
   } catch (err) {
     console.error("[nvidia-llm] chat completion failed:", err instanceof Error ? err.message : String(err));
-    // Fall through to the fallback.
   }
   return fallbackZaiChat(messages);
 }
