@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUserFromRequest } from "@/lib/auth";
+import { ensureZaiConfig } from "@/lib/zai-config";
 
 /**
  * POST /api/tts
@@ -61,7 +62,7 @@ export async function POST(req: NextRequest) {
     const speed = typeof body.speed === "number" && body.speed >= 0.5 && body.speed <= 2.0
       ? body.speed
       : 1.0;
-
+    ensureZaiConfig();
     const { default: ZAI } = await import("z-ai-web-dev-sdk");
     const zai = await ZAI.create();
 
