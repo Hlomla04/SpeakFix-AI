@@ -1,0 +1,670 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-space-grotesk);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ================================================================
+   SpeakFix AI — "Deep Signal" design system
+   Electric blue · cyan over a deep-navy night sky
+   Reference palette: #0a0e27 bg · #4f6ef7 primary · #00d4ff accent
+   ================================================================ */
+
+:root {
+  --radius: 1rem;
+
+  --background: oklch(0.978 0.006 255);
+  --foreground: oklch(0.225 0.045 275);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.225 0.045 275);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.225 0.045 275);
+  --primary: oklch(0.561 0.209 264);
+  --primary-foreground: oklch(0.985 0.002 255);
+  --secondary: oklch(0.955 0.012 255);
+  --secondary-foreground: oklch(0.35 0.07 270);
+  --muted: oklch(0.955 0.01 255);
+  --muted-foreground: oklch(0.51 0.035 265);
+  --accent: oklch(0.94 0.03 258);
+  --accent-foreground: oklch(0.35 0.08 268);
+  --destructive: oklch(0.585 0.24 16);
+  --border: oklch(0.905 0.015 260);
+  --input: oklch(0.905 0.015 260);
+  --ring: oklch(0.58 0.19 264);
+  --chart-1: oklch(0.561 0.209 264);
+  --chart-2: oklch(0.585 0.2 295);
+  --chart-3: oklch(0.79 0.145 220);
+  --chart-4: oklch(0.8 0.16 75);
+  --chart-5: oklch(0.65 0.17 160);
+  --sidebar: oklch(0.99 0.005 255);
+  --sidebar-foreground: oklch(0.225 0.045 275);
+  --sidebar-primary: oklch(0.561 0.209 264);
+  --sidebar-primary-foreground: oklch(0.985 0.002 255);
+  --sidebar-accent: oklch(0.94 0.03 258);
+  --sidebar-accent-foreground: oklch(0.35 0.08 268);
+  --sidebar-border: oklch(0.905 0.015 260);
+  --sidebar-ring: oklch(0.58 0.19 264);
+
+  /* Brand gradient stops: electric blue → bright blue → cyan */
+  --brand-1: oklch(0.561 0.209 264);
+  --brand-2: oklch(0.652 0.177 264);
+  --brand-3: oklch(0.79 0.145 220);
+
+  /* Signal-glow blob colors (light: soft blue haze) */
+  --aurora-1: oklch(0.75 0.11 264 / 0.32);
+  --aurora-2: oklch(0.82 0.08 220 / 0.24);
+  --aurora-3: oklch(0.78 0.09 275 / 0.28);
+  --dot-color: oklch(0.561 0.209 264 / 0.07);
+}
+
+.dark {
+  --background: oklch(0.19 0.05 275);
+  --foreground: oklch(0.955 0.01 260);
+  --card: oklch(0.232 0.055 274);
+  --card-foreground: oklch(0.955 0.01 260);
+  --popover: oklch(0.232 0.055 274);
+  --popover-foreground: oklch(0.955 0.01 260);
+  --primary: oklch(0.652 0.177 264);
+  --primary-foreground: oklch(0.16 0.04 275);
+  --secondary: oklch(0.28 0.05 274);
+  --secondary-foreground: oklch(0.955 0.01 260);
+  --muted: oklch(0.28 0.05 274);
+  --muted-foreground: oklch(0.72 0.03 265);
+  --accent: oklch(0.31 0.06 274);
+  --accent-foreground: oklch(0.955 0.01 260);
+  --destructive: oklch(0.68 0.2 20);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.652 0.177 264);
+  --chart-1: oklch(0.652 0.177 264);
+  --chart-2: oklch(0.68 0.19 295);
+  --chart-3: oklch(0.79 0.145 220);
+  --chart-4: oklch(0.8 0.16 75);
+  --chart-5: oklch(0.7 0.15 160);
+  --sidebar: oklch(0.232 0.055 274);
+  --sidebar-foreground: oklch(0.955 0.01 260);
+  --sidebar-primary: oklch(0.652 0.177 264);
+  --sidebar-primary-foreground: oklch(0.16 0.04 275);
+  --sidebar-accent: oklch(0.31 0.06 274);
+  --sidebar-accent-foreground: oklch(0.955 0.01 260);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.652 0.177 264);
+
+  --brand-1: oklch(0.652 0.177 264);
+  --brand-2: oklch(0.72 0.15 250);
+  --brand-3: oklch(0.79 0.145 220);
+
+  /* Signal-glow blob colors (dark: luminous blue haze) */
+  --aurora-1: oklch(0.5 0.22 264 / 0.45);
+  --aurora-2: oklch(0.55 0.16 220 / 0.32);
+  --aurora-3: oklch(0.45 0.2 275 / 0.38);
+  --dot-color: oklch(0.68 0.14 264 / 0.07);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background: oklch(0.652 0.177 264 / 0.3);
+  }
+}
+
+/* ---------------------------------------------------------------
+   Signal glow background — fixed layer behind all content
+   --------------------------------------------------------------- */
+.aurora-field {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+}
+.aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  will-change: transform;
+}
+.aurora-blob-1 {
+  width: 46rem;
+  height: 46rem;
+  top: -16rem;
+  left: -12rem;
+  background: radial-gradient(circle at center, var(--aurora-1), transparent 70%);
+  animation: aurora-drift-1 28s ease-in-out infinite alternate;
+}
+.aurora-blob-2 {
+  width: 40rem;
+  height: 40rem;
+  top: -8rem;
+  right: -14rem;
+  background: radial-gradient(circle at center, var(--aurora-2), transparent 70%);
+  animation: aurora-drift-2 34s ease-in-out infinite alternate;
+}
+.aurora-blob-3 {
+  width: 44rem;
+  height: 44rem;
+  bottom: -18rem;
+  left: 30%;
+  background: radial-gradient(circle at center, var(--aurora-3), transparent 70%);
+  animation: aurora-drift-3 40s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift-1 {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(7rem, 5rem) scale(1.18); }
+}
+@keyframes aurora-drift-2 {
+  from { transform: translate(0, 0) scale(1.1); }
+  to { transform: translate(-6rem, 6rem) scale(0.95); }
+}
+@keyframes aurora-drift-3 {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-8rem, -5rem) scale(1.15); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none; }
+}
+
+/* Subtle dot-grid texture over the glow */
+.dot-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* Barely-there film grain for depth */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------------------------------------------------------
+   Glass surfaces
+   --------------------------------------------------------------- */
+.glass-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: color-mix(in oklab, var(--card) 74%, transparent);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
+  box-shadow:
+    0 10px 40px -14px oklch(0.3 0.1 264 / 0.18),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.45);
+}
+.dark .glass-card {
+  border-color: oklch(1 0 0 / 9%);
+  box-shadow:
+    0 10px 40px -14px oklch(0 0 0 / 0.6),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.07);
+}
+.glass-bar {
+  background: color-mix(in oklab, var(--card) 62%, transparent);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border-color: color-mix(in oklab, var(--foreground) 9%, transparent);
+}
+.dark .glass-bar {
+  border-color: oklch(1 0 0 / 9%);
+}
+
+/* ---------------------------------------------------------------
+   Brand gradient helpers
+   --------------------------------------------------------------- */
+.text-gradient {
+  background-image: linear-gradient(115deg, var(--brand-1) 5%, var(--brand-2) 55%, var(--brand-3) 105%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-brand-gradient {
+  background-image: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+}
+
+.btn-brand {
+  background-image: linear-gradient(135deg, var(--brand-1), var(--brand-2));
+  color: var(--primary-foreground);
+  border: none;
+  box-shadow: 0 8px 24px -8px oklch(0.561 0.209 264 / 0.55);
+  transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.btn-brand:hover {
+  filter: brightness(1.09) saturate(1.05);
+  box-shadow: 0 12px 32px -8px oklch(0.561 0.209 264 / 0.65);
+}
+.btn-brand:active {
+  transform: translateY(1px);
+}
+
+/* Gradient fill for the Progress component */
+.progress-brand [data-slot="progress-indicator"] {
+  background-image: linear-gradient(90deg, var(--brand-1), var(--brand-3));
+  box-shadow: 0 0 12px oklch(0.79 0.145 220 / 0.5);
+}
+
+/* ---------------------------------------------------------------
+   Ticket stub — physical ticket with punched side notches
+   (solid card so the mask holes reveal the glow behind)
+   --------------------------------------------------------------- */
+.ticket-stub {
+  position: relative;
+  background:
+    linear-gradient(180deg, oklch(1 0 0 / 25%), transparent 30%),
+    var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  box-shadow:
+    0 18px 50px -18px oklch(0.3 0.12 264 / 0.35),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.5);
+  -webkit-mask:
+    radial-gradient(circle 10px at 0 var(--notch-y, 100%), transparent 97%, black 100%),
+    radial-gradient(circle 10px at 100% var(--notch-y, 100%), transparent 97%, black 100%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle 10px at 0 var(--notch-y, 100%), transparent 97%, black 100%),
+    radial-gradient(circle 10px at 100% var(--notch-y, 100%), transparent 97%, black 100%);
+  mask-composite: intersect;
+}
+.dark .ticket-stub {
+  border-color: oklch(1 0 0 / 12%);
+  box-shadow:
+    0 18px 50px -18px oklch(0 0 0 / 0.7),
+    inset 0 1px 0 0 oklch(1 0 0 / 0.08);
+}
+
+/* Perforation: dashed tear line across the ticket */
+.perforation {
+  position: relative;
+  height: 0;
+  border-top: 2px dashed color-mix(in oklab, var(--foreground) 22%, transparent);
+}
+
+/* CSS barcode */
+.barcode {
+  height: 26px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    currentColor 0 2px, transparent 2px 5px,
+    currentColor 5px 6px, transparent 6px 10px,
+    currentColor 10px 13px, transparent 13px 15px,
+    currentColor 15px 16px, transparent 16px 20px,
+    currentColor 20px 22px, transparent 22px 24px,
+    currentColor 24px 25px, transparent 25px 29px
+  );
+  opacity: 0.55;
+}
+
+/* Rubber-stamp confirmation mark */
+.stamp {
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  border: 3px double currentColor;
+  border-radius: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transform: rotate(-8deg);
+  opacity: 0.82;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='r'%3E%3CfeTurbulence baseFrequency='0.6' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cfilter id='r'%3E%3CfeTurbulence baseFrequency='0.6' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.15'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+  mask-size: cover;
+  -webkit-mask-size: cover;
+}
+
+/* ---------------------------------------------------------------
+   Mic orb — rotating conic aura
+   --------------------------------------------------------------- */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.conic-aura {
+  background: conic-gradient(
+    from var(--glow-angle),
+    oklch(0.561 0.209 264),
+    oklch(0.652 0.177 264),
+    oklch(0.79 0.145 220),
+    oklch(0.561 0.209 264)
+  );
+  animation: glow-rotate 7s linear infinite;
+}
+.conic-aura-fast {
+  animation-duration: 1.6s;
+}
+@keyframes glow-rotate {
+  to { --glow-angle: 360deg; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .conic-aura { animation: none; }
+}
+
+/* ---------------------------------------------------------------
+   Equalizer bars (voice activity indicator)
+   --------------------------------------------------------------- */
+.eq-bar {
+  width: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: eq-bounce 0.9s ease-in-out infinite;
+  height: 24%;
+}
+@keyframes eq-bounce {
+  0%, 100% { height: 22%; }
+  50% { height: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eq-bar { animation: none; height: 45%; }
+}
+
+/* ---------------------------------------------------------------
+   Custom scrollbar (electric blue)
+   --------------------------------------------------------------- */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.62 0.17 264 / 45%) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: oklch(0.62 0.17 264 / 45%);
+  border-radius: 999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.58 0.19 264 / 70%);
+}
+
+/* ---------------------------------------------------------------
+   Animations
+   --------------------------------------------------------------- */
+@keyframes ping-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  75%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+.animate-ping-slow {
+  animation: ping-slow 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Gentle float for decorative elements */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float-soft {
+  animation: float-soft 5s ease-in-out infinite;
+}
+
+/* ================================================================
+   LANDING PAGE — "Deep Signal" marketing surface
+   Always-dark navy sections + one white features band
+   ================================================================ */
+
+/* Fixed brand palette for landing (independent of app theme) */
+.landing {
+  --navy-900: #050816;
+  --navy-800: #0a0e27;
+  --navy-700: #111836;
+  --navy-600: #1a2240;
+  --navy-border: #253054;
+  --blue-primary: #4f6ef7;
+  --blue-bright: #6b8cff;
+  --cyan-accent: #00d4ff;
+}
+
+/* Hero glow: electric-blue nebula top-right + cyan haze bottom-left */
+.hero-glow {
+  background:
+    radial-gradient(ellipse 55% 45% at 82% 8%, rgba(79, 110, 247, 0.28), transparent 62%),
+    radial-gradient(ellipse 45% 40% at 8% 88%, rgba(0, 212, 255, 0.1), transparent 60%),
+    radial-gradient(ellipse 35% 35% at 45% 110%, rgba(109, 90, 246, 0.14), transparent 65%);
+}
+
+/* Subtle geometric mesh grid over dark sections */
+.mesh-grid {
+  background-image:
+    linear-gradient(rgba(107, 140, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(107, 140, 255, 0.045) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 20%, black 30%, transparent 100%);
+}
+
+/* Landing navbar: transparent at top → frosted navy when scrolled */
+.landing-nav {
+  background: transparent;
+  border-color: transparent;
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.landing-nav.scrolled {
+  background: rgba(10, 14, 39, 0.82);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-color: rgba(107, 140, 255, 0.14);
+  box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.55);
+}
+
+/* Pill CTA buttons (landing) */
+.btn-primary-landing {
+  background-image: linear-gradient(135deg, #4f6ef7, #6366f1);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(79, 110, 247, 0.4);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+.btn-primary-landing:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 0 8px 28px rgba(79, 110, 247, 0.55);
+}
+.btn-ghost-landing {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.btn-ghost-landing:hover {
+  border-color: #6b8cff;
+  background: rgba(107, 140, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Chat mockup bubbles */
+.msg-in {
+  opacity: 0;
+  transform: translateY(14px) scale(0.96);
+  animation: msg-enter 0.55s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+@keyframes msg-enter {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg-in { animation: none; opacity: 1; transform: none; }
+}
+
+/* Floating mic button — expanding pulse rings */
+.pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid rgba(79, 110, 247, 0.75);
+  animation: pulse-ring-expand 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+.pulse-ring.delay-1 { animation-delay: 0.7s; }
+.pulse-ring.delay-2 { animation-delay: 1.4s; }
+@keyframes pulse-ring-expand {
+  0% { transform: scale(1); opacity: 0.75; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-ring { animation: none; opacity: 0; }
+}
+
+/* Mic button glow */
+.mic-glow {
+  background:
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.35), transparent 45%),
+    linear-gradient(135deg, #4f6ef7, #6366f1);
+  box-shadow:
+    0 0 30px rgba(79, 110, 247, 0.6),
+    0 0 60px rgba(79, 110, 247, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Chat typing indicator */
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #6b8cff;
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .typing-dot { animation: none; }
+}
+
+/* Green live dot (Listening indicator) */
+.live-dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #10b981;
+}
+.live-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #10b981;
+  animation: live-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes live-ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot::after { animation: none; opacity: 0; }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Step connector — dashed line between numbered steps */
+.step-connector {
+  background-image: linear-gradient(90deg, #334155 55%, transparent 45%);
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+}
+
+/* Landing chat window: subtle 3D tilt */
+.chat-tilt {
+  transform: perspective(1400px) rotateY(-3deg) rotateX(1.5deg);
+  transition: transform 0.5s ease;
+}
+.chat-tilt:hover {
+  transform: perspective(1400px) rotateY(0deg) rotateX(0deg);
+}
+@media (max-width: 1024px) {
+  .chat-tilt { transform: none; }
+}
+
+/* Dashboard mockup: slight rotation + deep shadow */
+.dash-tilt {
+  transform: perspective(1600px) rotateY(-4deg) rotateX(2deg) rotate(0.5deg);
+  transition: transform 0.5s ease;
+}
+.dash-tilt:hover {
+  transform: perspective(1600px) rotateY(0) rotateX(0) rotate(0);
+}
+@media (max-width: 1024px) {
+  .dash-tilt { transform: none; }
+}
+
+/* Soft blue sheen on feature-card hover */
+.feature-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.feature-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79, 110, 247, 0.35);
+  box-shadow: 0 18px 40px -16px rgba(79, 110, 247, 0.28);
+}

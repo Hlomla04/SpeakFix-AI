@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpeakFix AI — Use Case Diagram</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --text: #1F2937;
+    --text-sub: #4B5563;
+    --text-muted: #6B7280;
+    --bg: #FFFFFF;
+    --surface: #FAFBFC;
+    --border: #E5E7EB;
+    --border-strong: #CBD5E1;
+    --connector: #94A3B8;
+    /* Actor palette — calm, professional, one hue family each */
+    --reporter-bg: #EFF6FF;       --reporter-border: #3B82F6;       --reporter-text: #1E3A8A;
+    --ai-bg: #F0F4F8;             --ai-border: #64748B;            --ai-text: #1E293B;
+    --tech-bg: #F0FDF4;           --tech-border: #10B981;          --tech-text: #065F46;
+    --admin-bg: #FFF7ED;          --admin-border: #F59E0B;        --admin-text: #92400E;
+    --supabase-bg: #F5F3FF;       --supabase-border: #8B5CF6;      --supabase-text: #5B21B6;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    width: fit-content;
+    min-width: 1800px;
+    margin: 0 auto;
+    padding: 56px 60px 48px;
+  }
+
+  /* ───────────── Header ───────────── */
+  .doc-header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .doc-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .doc-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .doc-subtitle {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-top: 6px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.55;
+  }
+
+  /* ───────────── Diagram canvas ───────────── */
+  .canvas {
+    margin-top: 40px;
+    position: relative;
+  }
+
+  /* SVG layer holds the association lines (actor ↔ use case) */
+  .canvas-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* The grid: 5 columns — actor | usecases | actor | usecases | actor
+     Actor columns hold actor "stick figure + name" cards.
+     Use-case columns hold the pill-shaped use cases. */
+  .grid {
+    display: grid;
+    grid-template-columns:
+      180px
+      minmax(280px, 1fr)
+      180px
+      minmax(280px, 1fr)
+      180px;
+    column-gap: 32px;
+    row-gap: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ───────────── Actor card (leftmost and rightmost columns) ───────────── */
+  .actor-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 12px;
+  }
+
+  .actor-card {
+    width: 168px;
+    background: var(--bg);
+    border: 2px solid var(--border-strong);
+    border-radius: 14px;
+    padding: 22px 14px 18px;
+    text-align: center;
+    position: sticky;
+    top: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .actor-card.reporter { background: var(--reporter-bg); border-color: var(--reporter-border); }
+  .actor-card.ai       { background: var(--ai-bg);       border-color: var(--ai-border); }
+  .actor-card.tech     { background: var(--tech-bg);     border-color: var(--tech-border); }
+  .actor-card.admin    { background: var(--admin-bg);    border-color: var(--admin-border); }
+  .actor-card.supabase { background: var(--supabase-bg); border-color: var(--supabase-border); }
+
+  .actor-icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+  }
+  .actor-card.reporter .actor-icon { color: var(--reporter-border); }
+  .actor-card.ai       .actor-icon { color: var(--ai-border); }
+  .actor-card.tech     .actor-icon { color: var(--tech-border); }
+  .actor-card.admin    .actor-icon { color: var(--admin-border); }
+  .actor-card.supabase .actor-icon { color: var(--supabase-border); }
+
+  /* Stick-figure style icon — pure CSS, no robot/brain decorations */
+  .stick {
+    position: relative;
+    width: 22px;
+    height: 22px;
+    display: inline-block;
+  }
+  .stick::before { /* head */
+    content: "";
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 9px; height: 9px;
+    border: 1.6px solid currentColor;
+    border-radius: 50%;
+    background: transparent;
+  }
+  .stick::after { /* body */
+    content: "";
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 12px; height: 12px;
+    border-top: 1.6px solid currentColor;
+    border-left: 1.6px solid currentColor;
+    border-right: 1.6px solid currentColor;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+  }
+
+  /* AI / system icon — a speech bubble (clean, not a robot) */
+  .bubble {
+    width: 22px; height: 22px;
+    border: 1.6px solid currentColor;
+    border-radius: 6px 6px 6px 0;
+    background: transparent;
+    position: relative;
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    left: 4px; top: 7px;
+    width: 3px; height: 3px;
+    background: currentColor;
+    border-radius: 50%;
+    box-shadow: 6px 0 0 currentColor, 12px 0 0 currentColor;
+  }
+
+  /* Supabase / backend icon — a server stack */
+  .stack {
+    width: 22px; height: 22px;
+    position: relative;
+  }
+  .stack span {
+    position: absolute;
+    left: 0; right: 0;
+    height: 4px;
+    border: 1.4px solid currentColor;
+    border-radius: 2px;
+    background: transparent;
+  }
+  .stack span:nth-child(1) { top: 1px; }
+  .stack span:nth-child(2) { top: 9px; }
+  .stack span:nth-child(3) { top: 17px; }
+
+  .actor-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 4px;
+    letter-spacing: -0.005em;
+  }
+  .actor-role {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-top: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .actor-card.reporter .actor-role { color: var(--reporter-text); }
+  .actor-card.ai       .actor-role { color: var(--ai-text); }
+  .actor-card.tech     .actor-role { color: var(--tech-text); }
+  .actor-card.admin    .actor-role { color: var(--admin-text); }
+  .actor-card.supabase .actor-role { color: var(--supabase-text); }
+
+  /* ───────────── Use case column ───────────── */
+  .uc-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    position: relative;
+  }
+  .uc-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    text-align: center;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border);
+  }
+
+  .uc {
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.35;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .uc .uc-text { display: inline; }
+  .uc .uc-num {
+    display: inline-flex;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+  }
+
+  /* Shared use case (used by 2+ actors) — distinguished by dashed border + slightly darker bg */
+  .uc.shared {
+    background: #FFFBEB;
+    border-color: #F59E0B;
+    border-style: dashed;
+    color: #78350F;
+  }
+  .uc.shared .uc-num {
+    background: #FEF3C7;
+    border-color: #F59E0B;
+    color: #92400E;
+  }
+
+  /* ───────────── Center column (SpeakFix AI) ───────────── */
+  .center-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+  .center-spacer { flex: 1; min-height: 80px; }
+
+  /* ───────────── Legend ───────────── */
+  .legend {
+    margin-top: 36px;
+    display: flex;
+    gap: 28px;
+    justify-content: center;
+    padding: 14px 22px;
+    background: #FAFBFC;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    border: 1.5px solid;
+  }
+  .legend-swatch.actor { background: var(--surface); border-color: var(--border-strong); }
+  .legend-swatch.uc { background: var(--surface); border-color: var(--border-strong); border-radius: 8px; }
+  .legend-swatch.shared { background: #FFFBEB; border-color: #F59E0B; border-style: dashed; border-radius: 8px; }
+  .legend-line {
+    width: 28px; height: 0; border-top: 1.5px dashed var(--connector);
+  }
+
+  /* ───────────── Footer note ───────────── */
+  .doc-foot {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="doc-header">
+    <div class="doc-eyebrow">SpeakFix AI · System Documentation</div>
+    <div class="doc-title">Use Case Diagram</div>
+    <div class="doc-subtitle">
+      Five actors and the system functions they participate in. Solid pills are
+      actor-specific use cases; dashed amber pills are shared use cases invoked
+      by more than one actor.
+    </div>
+  </div>
+
+  <div class="canvas">
+    <svg class="canvas-svg" id="lines"></svg>
+
+    <div class="grid">
+
+      <!-- ══════════ Column 1: User / Reporter ══════════ -->
+      <div class="actor-col">
+        <div class="actor-card reporter" data-actor="reporter">
+          <div class="actor-icon"><span class="stick"></span></div>
+          <div class="actor-name">User / Reporter</div>
+          <div class="actor-role">Reports issues</div>
+        </div>
+      </div>
+
+      <!-- ══════════ Column 2: Reporter use cases ══════════ -->
+      <div class="uc-col" data-uc-group="reporter">
+        <div class="uc-group-label">Reporter use cases</div>
+
+        <div class="uc" data-uc="r1"><span class="uc-num">1</span><span class="uc-text">Sign up / Log in</span></div>
+        <div class="uc" data-uc="r2"><span class="uc-num">2</span><span class="uc-text">Report maintenance issue using voice</span></div>
+        <div class="uc" data-uc="r3"><span class="uc-num">3</span><span class="uc-text">Answer AI follow-up questions</span></div>
+        <div class="uc" data-uc="r4"><span class="uc-num">4</span><span class="uc-text">Confirm location &amp; details</span></div>
+        <div class="uc" data-uc="r5"><span class="uc-num">5</span><span class="uc-text">Receive ticket number</span></div>
+        <div class="uc" data-uc="r6"><span class="uc-num">6</span><span class="uc-text">View own tickets</span></div>
+        <div class="uc" data-uc="r7"><span class="uc-num">7</span><span class="uc-text">View ticket status</span></div>
+        <div class="uc shared" data-uc="verify"><span class="uc-num">8</span><span class="uc-text">Confirm repair was successful</span></div>
+        <div class="uc shared" data-uc="reopen"><span class="uc-num">9</span><span class="uc-text">Reopen ticket if problem persists</span></div>
+      </div>
+
+      <!-- ══════════ Column 3: SpeakFix AI (center) ══════════ -->
+      <div class="actor-col">
+        <div class="actor-card ai" data-actor="ai">
+          <div class="actor-icon"><span class="bubble"></span></div>
+          <div class="actor-name">SpeakFix AI</div>
+          <div class="actor-role">Voice agent &amp; brain</div>
+        </div>
+      </div>
+
+      <!-- ══════════ Column 4: AI + staff use cases ══════════ -->
+      <div class="uc-col" data-uc-group="ai-tech-admin">
+        <div class="uc-group-label">SpeakFix AI — system use cases</div>
+
+        <div class="uc" data-uc="a1"><span class="uc-num">1</span><span class="uc-text">Listen to user speech</span></div>
+        <div class="uc" data-uc="a2"><span class="uc-num">2</span><span class="uc-text">Understand &amp; transcribe speech</span></div>
+        <div class="uc" data-uc="a3"><span class="uc-num">3</span><span class="uc-text">Ask follow-up questions if needed</span></div>
+        <div class="uc" data-uc="a4"><span class="uc-num">4</span><span class="uc-text">Extract issue information</span></div>
+        <div class="uc" data-uc="a5"><span class="uc-num">5</span><span class="uc-text">Identify location</span></div>
+        <div class="uc" data-uc="a6"><span class="uc-num">6</span><span class="uc-text">Classify issue category</span></div>
+        <div class="uc" data-uc="a7"><span class="uc-num">7</span><span class="uc-text">Determine priority</span></div>
+        <div class="uc" data-uc="a8"><span class="uc-num">8</span><span class="uc-text">Detect similar / recurring incidents</span></div>
+        <div class="uc" data-uc="a9"><span class="uc-num">9</span><span class="uc-text">Create maintenance ticket</span></div>
+        <div class="uc" data-uc="a10"><span class="uc-num">10</span><span class="uc-text">Notify / route ticket to maintenance</span></div>
+        <div class="uc" data-uc="a11"><span class="uc-num">11</span><span class="uc-text">Communicate ticket status</span></div>
+        <div class="uc shared" data-uc="verify"><span class="uc-num">12</span><span class="uc-text">Ask reporter: "Is the problem actually fixed?"</span></div>
+        <div class="uc shared" data-uc="verify-process"><span class="uc-num">13</span><span class="uc-text">Process reporter confirmation / reopen</span></div>
+        <div class="uc" data-uc="a12"><span class="uc-num">14</span><span class="uc-text">Assist technician with voice resolution</span></div>
+        <div class="uc" data-uc="a13"><span class="uc-num">15</span><span class="uc-text">Perform AI-assisted resolution check</span></div>
+      </div>
+
+      <!-- ══════════ Column 5: Maintenance Technician (top) + Administrator (middle) + Supabase (bottom) ══════════ -->
+      <div class="actor-col" style="gap: 28px;">
+        <div class="actor-card tech" data-actor="tech">
+          <div class="actor-icon"><span class="stick"></span></div>
+          <div class="actor-name">Maintenance<br>Technician</div>
+          <div class="actor-role">Performs repairs</div>
+        </div>
+
+        <div class="actor-card admin" data-actor="admin">
+          <div class="actor-icon"><span class="stick"></span></div>
+          <div class="actor-name">Administrator</div>
+          <div class="actor-role">Manages system</div>
+        </div>
+
+        <div class="actor-card supabase" data-actor="supabase">
+          <div class="actor-icon"><span class="stack"><span></span><span></span><span></span></span></div>
+          <div class="actor-name">Supabase /<br>Backend</div>
+          <div class="actor-role">System infrastructure</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ Second grid row: Tech + Admin + Supabase use cases ══════════ -->
+    <div class="grid" style="margin-top: 32px; grid-template-columns: 180px minmax(280px, 1fr) 180px minmax(280px, 1fr) 180px;">
+      <div></div>
+
+      <!-- Tech use cases (column 2 of row 2) -->
+      <div class="uc-col" data-uc-group="tech">
+        <div class="uc-group-label">Maintenance technician use cases</div>
+        <div class="uc" data-uc="t1"><span class="uc-num">1</span><span class="uc-text">Log in</span></div>
+        <div class="uc" data-uc="t2"><span class="uc-num">2</span><span class="uc-text">View assigned / incoming tickets</span></div>
+        <div class="uc" data-uc="t3"><span class="uc-num">3</span><span class="uc-text">Review issue &amp; transcript</span></div>
+        <div class="uc" data-uc="t4"><span class="uc-num">4</span><span class="uc-text">Start work on ticket</span></div>
+        <div class="uc" data-uc="t5"><span class="uc-num">5</span><span class="uc-text">Record work performed (by voice)</span></div>
+        <div class="uc" data-uc="t6"><span class="uc-num">6</span><span class="uc-text">Submit resolution notes</span></div>
+        <div class="uc" data-uc="t7"><span class="uc-num">7</span><span class="uc-text">Submit test / result</span></div>
+        <div class="uc" data-uc="t8"><span class="uc-num">8</span><span class="uc-text">Submit evidence (photos / parts / notes)</span></div>
+        <div class="uc shared" data-uc="send-verify"><span class="uc-num">9</span><span class="uc-text">Send ticket for reporter verification</span></div>
+      </div>
+
+      <div></div>
+
+      <!-- Admin use cases (column 4 of row 2) -->
+      <div class="uc-col" data-uc-group="admin">
+        <div class="uc-group-label">Administrator use cases</div>
+        <div class="uc" data-uc="m1"><span class="uc-num">1</span><span class="uc-text">Log in</span></div>
+        <div class="uc" data-uc="m2"><span class="uc-num">2</span><span class="uc-text">View all tickets (organisation-wide)</span></div>
+        <div class="uc" data-uc="m3"><span class="uc-num">3</span><span class="uc-text">Assign tickets to technicians</span></div>
+        <div class="uc" data-uc="m4"><span class="uc-num">4</span><span class="uc-text">Manage users &amp; technicians</span></div>
+        <div class="uc" data-uc="m5"><span class="uc-num">5</span><span class="uc-text">Monitor ticket activity</span></div>
+        <div class="uc" data-uc="m6"><span class="uc-num">6</span><span class="uc-text">View recurring incidents</span></div>
+        <div class="uc" data-uc="m7"><span class="uc-num">7</span><span class="uc-text">Monitor overall system activity</span></div>
+      </div>
+
+      <div></div>
+    </div>
+
+    <!-- ══════════ Third grid row: Supabase / Backend use cases ══════════ -->
+    <div class="grid" style="margin-top: 32px; grid-template-columns: 180px minmax(280px, 1fr) 180px minmax(280px, 1fr) 180px;">
+      <div></div>
+
+      <div class="uc-col" data-uc-group="supabase">
+        <div class="uc-group-label">Supabase / backend responsibilities</div>
+        <div class="uc" data-uc="s1"><span class="uc-num">1</span><span class="uc-text">Authentication (sign up / login / sessions)</span></div>
+        <div class="uc" data-uc="s2"><span class="uc-num">2</span><span class="uc-text">User profile storage</span></div>
+        <div class="uc" data-uc="s3"><span class="uc-num">3</span><span class="uc-text">Ticket storage</span></div>
+        <div class="uc" data-uc="s4"><span class="uc-num">4</span><span class="uc-text">Resolution &amp; evidence storage</span></div>
+        <div class="uc" data-uc="s5"><span class="uc-num">5</span><span class="uc-text">Verification records</span></div>
+        <div class="uc" data-uc="s6"><span class="uc-num">6</span><span class="uc-text">Audit history (immutable timeline)</span></div>
+        <div class="uc" data-uc="s7"><span class="uc-num">7</span><span class="uc-text">Role-based access control</span></div>
+        <div class="uc" data-uc="s8"><span class="uc-num">8</span><span class="uc-text">Per-user ticket isolation</span></div>
+      </div>
+
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch actor"></div>Actor</div>
+    <div class="legend-item"><div class="legend-swatch uc"></div>Use case</div>
+    <div class="legend-item"><div class="legend-swatch shared"></div>Shared use case (multiple actors)</div>
+    <div class="legend-item"><div class="legend-line"></div>Association</div>
+  </div>
+
+  <div class="doc-foot">
+    SpeakFix closes the loop: <strong>voice → understand → classify → create → repair →
+    document → verify → confirm → close</strong>. A ticket is not "Resolved" until the
+    original reporter confirms the fix; if the reporter says the problem persists, the
+    ticket is reopened and returns to the maintenance workflow.
+  </div>
+</div>
+
+<script>
+  // Draw clean association brackets: one bracket per actor connecting to the
+  // top-center of that actor's use-case column. This is the standard UML
+  // "actor ↔ use case package" representation — much cleaner than drawing a
+  // separate line to every individual use case.
+  function drawLines() {
+    const svg = document.getElementById('lines');
+    const canvas = svg.parentElement;
+    const cRect = canvas.getBoundingClientRect();
+    svg.setAttribute('width', cRect.width);
+    svg.setAttribute('height', cRect.height);
+    svg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
+    svg.querySelectorAll('line, path').forEach(el => el.remove());
+
+    const ns = 'http://www.w3.org/2000/svg';
+
+    // Each entry: [actorKey, ucGroupKey] → draws ONE bracket from the actor
+    // card's near-side edge to the top of the UC column.
+    const associations = [
+      ['reporter',  'reporter'],
+      ['ai',        'ai-tech-admin'],
+      ['tech',      'tech'],
+      ['admin',     'admin'],
+      ['supabase',  'supabase'],
+    ];
+
+    associations.forEach(([actorKey, ucGroupKey]) => {
+      const actorEl = document.querySelector(`[data-actor="${actorKey}"]`);
+      const ucGroup = document.querySelector(`[data-uc-group="${ucGroupKey}"]`);
+      if (!actorEl || !ucGroup) return;
+
+      const actorRect = actorEl.getBoundingClientRect();
+      const ucRect = ucGroup.getBoundingClientRect();
+
+      const actorCenterY = actorRect.top + actorRect.height / 2;
+      const ucTopY = ucRect.top;
+
+      const actorCenterX = actorRect.left + actorRect.width / 2;
+      const ucCenterX = ucRect.left + ucRect.width / 2;
+
+      let x1, y1, x2, y2;
+      if (ucCenterX > actorCenterX) {
+        // UC is to the right of actor
+        x1 = actorRect.right - cRect.left;
+        x2 = ucRect.left - cRect.left;
+      } else {
+        // UC is to the left of actor
+        x1 = actorRect.left - cRect.left;
+        x2 = ucRect.right - cRect.left;
+      }
+      y1 = actorCenterY - cRect.top;
+      y2 = ucTopY - cRect.top;
+
+      // Draw a clean orthogonal "bracket": horizontal line from actor, then a
+      // short vertical drop to the UC column's top edge.
+      const midY = (y1 + y2) / 2;
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', `M ${x1} ${y1} L ${(x1 + x2) / 2} ${y1} L ${(x1 + x2) / 2} ${y2} L ${x2} ${y2}`);
+      path.setAttribute('stroke', '#94A3B8');
+      path.setAttribute('stroke-width', '1.5');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('opacity', '0.7');
+      svg.appendChild(path);
+    });
+
+    // Shared-use-case associations: thin amber dashed lines from the AI actor
+    // (center column) to each shared UC pill that lives in a side column.
+    // These are the only "individual" lines, kept distinct in color so they
+    // don't compete with the actor→column brackets.
+    const sharedUcs = ['verify', 'reopen', 'verify-process', 'send-verify'];
+    const aiActor = document.querySelector('[data-actor="ai"]');
+    if (aiActor) {
+      const aiRect = aiActor.getBoundingClientRect();
+      const aiCenterY = aiRect.top + aiRect.height / 2;
+      const aiCenterX = aiRect.left + aiRect.width / 2;
+      sharedUcs.forEach(ucKey => {
+        document.querySelectorAll(`[data-uc="${ucKey}"]`).forEach(ucEl => {
+          const ucRect = ucEl.getBoundingClientRect();
+          // Only draw a line if the UC is NOT in the AI's own column (i.e., it lives in a side column).
+          const ucCenterX = ucRect.left + ucRect.width / 2;
+          if (Math.abs(ucCenterX - aiCenterX) < 100) return; // same column, skip
+
+          let x1, x2;
+          if (ucCenterX < aiCenterX) {
+            x1 = aiRect.left - cRect.left;
+            x2 = ucRect.right - cRect.left;
+          } else {
+            x1 = aiRect.right - cRect.left;
+            x2 = ucRect.left - cRect.left;
+          }
+          const y1 = aiCenterY - cRect.top;
+          const y2 = ucRect.top + ucRect.height / 2 - cRect.top;
+
+          const line = document.createElementNS(ns, 'line');
+          line.setAttribute('x1', x1);
+          line.setAttribute('y1', y1);
+          line.setAttribute('x2', x2);
+          line.setAttribute('y2', y2);
+          line.setAttribute('stroke', '#F59E0B');
+          line.setAttribute('stroke-width', '1');
+          line.setAttribute('stroke-dasharray', '4,3');
+          line.setAttribute('opacity', '0.6');
+          svg.appendChild(line);
+        });
+      });
+    }
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(drawLines, 100);
+  });
+</script>
+</body>
+</html>

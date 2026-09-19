@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+//
+// DATABASE PROVIDER is chosen by environment variable:
+//   - Local dev:     provider = "sqlite"      (set DATABASE_URL=file:./db/custom.db)
+//   - Production:    provider = "postgresql"  (set DATABASE_URL=postgresql://...)
+//
+// To switch from SQLite (default) to Postgres, just change the provider line below
+// and set the DATABASE_URL env var to your Postgres connection string. The models
+// below are compatible with both databases.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // For local development with SQLite, use:
+  //   provider = "sqlite"
+  //   DATABASE_URL=file:./db/custom.db
+  //
+  // For production with Supabase Postgres (free), use:
+  //   provider = "postgresql"
+  //   DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+  //
+  // Vercel + Supabase Postgres is the recommended free deployment path.
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  // UUID from Supabase Auth (auth.users.id) — used to map JWT sub → local profile
+  supabaseUid       String    @unique
+  name              String
+  email             String    @unique
+  preferredLanguage String    @default("English")
+  // USER | TECHNICIAN | ADMIN
+  role              String    @default("USER")
+  createdAt         DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  tickets           Ticket[]            @relation("Reporter") // tickets reported by this user
+  assignedTickets   Ticket[]            @relation("AssignedTechnician") // tickets this user is assigned to as technician
+  resetTokens       PasswordResetToken[]
+}
+
+// Note: Session model removed — Supabase Auth manages sessions (JWT in cookie).
+// PasswordResetToken kept for our MVP recovery-link flow (links a custom token → local user id,
+// which lets us call supabase.auth.admin.updateUserById to set the new password).
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id            String    @id @default(cuid())
+  ticketNumber  String    @unique
+  title         String
+  description   String
+  category      String
+  priority      String
+  // OPEN | IN_PROGRESS | AWAITING_VERIFICATION | RESOLVED | REOPENED
+  status        String    @default("OPEN")
+  location      String
+  requesterName String    @default("Anonymous")
+  contactInfo   String?
+  urgencyReason String?
+  source        String    @default("voice")
+  transcript    String    @default("")
+  userId        String?
+  user          User?     @relation("Reporter", fields: [userId], references: [id], onDelete: SetNull)
+
+  // ---- Verified resolution workflow ----
+  // Technician who is assigned to this ticket
+  assignedTechnicianId String?
+  assignedTechnician   User?   @relation("AssignedTechnician", fields: [assignedTechnicianId], references: [id], onDelete: SetNull)
+  // What the technician actually fixed (structured, from voice or typed)
+  technicianAction     String?
+  // Resolution notes submitted by the technician
+  resolutionNotes      String?
+  // Test / result recorded to support the fix
+  testResult           String?
+  // JSON array of evidence entries: [{ "type": "photo|checklist|part|note|voice", "label": "...", "note": "..." }]
+  evidence             String?
+  resolutionSubmittedAt DateTime?
+  // Cautious AI note comparing complaint vs resolution (never accusatory)
+  resolutionCheckNote  String?
+  // When the reporter confirmed the problem is actually fixed
+  reporterConfirmedAt  DateTime?
+  // Last thing the reporter said when confirming / reopening
+  reporterResponse     String?
+  // How many times the reporter reopened this ticket
+  reopenCount          Int     @default(0)
+  // Similar past incidents found when the ticket was created (real data only)
+  similarIncidentCount Int?
+  similarIncidentNote  String?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  audit         AuditEntry[]
+}
+
+/// Immutable record of every important action on a ticket.
+model AuditEntry {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  // null = SpeakFix system action
+  actorId   String?
+  actorName String
+  // REPORTER | TECHNICIAN | ADMIN | SYSTEM
+  actorRole String
+  // TICKET_CREATED | ASSIGNED | WORK_STARTED | RESOLUTION_SUBMITTED | EVIDENCE_SUBMITTED |
+  // VERIFICATION_REQUESTED | REPORTER_CONFIRMED | TICKET_REOPENED | TICKET_DELETED | DETAILS_UPDATED
+  action    String
+  // Human-readable sentence shown in the timeline
+  detail    String?
+  createdAt DateTime @default(now())
+
+  @@index([ticketId, createdAt])
+}

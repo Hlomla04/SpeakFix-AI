@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SpeakFix AI — System Flow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --text: #1F2937;
+    --text-sub: #4B5563;
+    --text-muted: #6B7280;
+    --bg: #FFFFFF;
+    --surface: #FAFBFC;
+    --border: #E5E7EB;
+    --border-strong: #CBD5E1;
+    --connector: #94A3B8;
+
+    --phase-1-bg: #F0F4F8;  --phase-1-bar: #64748B;  --phase-1-text: #334155;
+    --phase-2-bg: #E8EDF2;  --phase-2-bar: #5B7A99;  --phase-2-text: #1E3A5F;
+    --phase-3-bg: #E0E7EF;  --phase-3-bar: #4A6B8A;  --phase-3-text: #1E3050;
+    --phase-4-bg: #D8E0EA;  --phase-4-bar: #3A5C7A;  --phase-4-text: #172540;
+
+    /* Decision + terminal nodes — keep low-saturation, no neon */
+    --decision-bg: #FFF7ED;  --decision-border: #F59E0B;  --decision-text: #92400E;
+    --resolved-bg: #F0FDF4;  --resolved-border: #10B981;  --resolved-text: #065F46;
+    --reopened-bg: #FEF2F2;  --reopened-border: #EF4444;  --reopened-text: #991B1B;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    width: fit-content;
+    min-width: 1100px;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 56px 60px 48px;
+  }
+
+  /* ───────────── Header ───────────── */
+  .doc-header { text-align: center; margin-bottom: 8px; }
+  .doc-eyebrow {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.18em; color: var(--text-muted);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .doc-title {
+    font-size: 26px; font-weight: 700;
+    color: var(--text); letter-spacing: -0.01em;
+  }
+  .doc-subtitle {
+    font-size: 14px; color: var(--text-sub);
+    margin-top: 6px; max-width: 720px;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.55;
+  }
+
+  /* ───────────── Pipeline banner (the eight-verb headline) ───────────── */
+  .pipeline {
+    margin: 28px auto 36px;
+    max-width: 920px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 22px;
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .pipeline-step {
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    flex: 1;
+    text-align: center;
+  }
+  .pipeline-sep {
+    color: #CBD5E1;
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0 4px;
+  }
+  .pipeline-step:last-child { color: var(--resolved-border); }
+
+  /* ───────────── Phase group (Layout C — Phased Vertical) ───────────── */
+  .canvas {
+    position: relative;
+  }
+  .canvas-svg {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .phase-group {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 18px 24px 22px;
+    margin-bottom: 0;
+    border: 1.5px solid var(--border);
+    position: relative;
+    z-index: 1;
+  }
+  .phase-1 { background: var(--phase-1-bg); }
+  .phase-2 { background: var(--phase-2-bg); }
+  .phase-3 { background: var(--phase-3-bg); }
+  .phase-4 { background: var(--phase-4-bg); }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .phase-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1.5px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .phase-1 .phase-num { color: var(--phase-1-bar); }
+  .phase-2 .phase-num { color: var(--phase-2-bar); }
+  .phase-3 .phase-num { color: var(--phase-3-bar); }
+  .phase-4 .phase-num { color: var(--phase-4-bar); }
+
+  .phase-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    flex: 1;
+  }
+  .phase-1 .phase-title { color: var(--phase-1-text); }
+  .phase-2 .phase-title { color: var(--phase-2-text); }
+  .phase-3 .phase-title { color: var(--phase-3-text); }
+  .phase-4 .phase-title { color: var(--phase-4-text); }
+
+  .phase-actor {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  .phase-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 6px;
+  }
+  .phase-step {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    padding: 7px 12px 7px 36px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.04);
+    line-height: 1.45;
+    position: relative;
+  }
+  .phase-step .step-num {
+    position: absolute;
+    left: 8px; top: 50%;
+    transform: translateY(-50%);
+    width: 20px; height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    background: #FFFFFF;
+    color: #64748B;
+    border: 1px solid var(--border);
+  }
+  .phase-2 .phase-step .step-num { color: var(--phase-2-text); border-color: #B7C6D6; }
+  .phase-3 .phase-step .step-num { color: var(--phase-3-text); border-color: #A7B6CB; }
+  .phase-4 .phase-step .step-num { color: var(--phase-4-text); border-color: #95A6BD; }
+
+  /* ───────────── Phase-to-phase connector ───────────── */
+  .phase-arrow {
+    text-align: center;
+    margin: 6px 0;
+    color: var(--connector);
+    font-size: 22px;
+    line-height: 1;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ───────────── Decision branch block ───────────── */
+  .decision-block {
+    margin: 6px 0 0;
+    background: var(--decision-bg);
+    border: 2px solid var(--decision-border);
+    border-radius: 12px;
+    padding: 22px 28px;
+    position: relative;
+    z-index: 1;
+  }
+  .decision-question {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--decision-text);
+    margin-bottom: 18px;
+  }
+  .decision-question .quote {
+    color: var(--decision-text);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .decision-branches {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    position: relative;
+  }
+  .branch {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .branch-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    padding: 6px 0;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+  .branch.yes .branch-label { background: rgba(16,185,129,0.12); color: var(--resolved-text); border: 1px solid var(--resolved-border); }
+  .branch.no  .branch-label { background: rgba(239,68,68,0.10);  color: var(--reopened-text); border: 1px solid var(--reopened-border); }
+
+  .branch-node {
+    background: #FFFFFF;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 12px 16px;
+    text-align: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .branch-node .node-sub {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .branch.yes .terminal {
+    background: var(--resolved-bg);
+    border-color: var(--resolved-border);
+    color: var(--resolved-text);
+    font-weight: 700;
+  }
+  .branch.no .terminal {
+    background: var(--reopened-bg);
+    border-color: var(--reopened-border);
+    color: var(--reopened-text);
+    font-weight: 700;
+  }
+
+  .branch-arrow {
+    text-align: center;
+    color: var(--connector);
+    font-size: 18px;
+    line-height: 1;
+    margin: 2px 0;
+  }
+
+  /* Reopen loop arrow — wraps from "Reopened" back up to "Repair again" via the right edge */
+  .reopen-loop {
+    margin: 18px auto 0;
+    max-width: 460px;
+    background: rgba(239,68,68,0.04);
+    border: 1px dashed rgba(239,68,68,0.4);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    position: relative;
+  }
+  .reopen-loop .loop-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--reopened-text);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .reopen-loop .loop-text {
+    font-size: 12.5px;
+    color: var(--text-sub);
+    line-height: 1.5;
+  }
+
+  /* ───────────── Legend ───────────── */
+  .legend {
+    margin-top: 36px;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    padding: 14px 22px;
+    background: #FAFBFC;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-sub);
+  }
+  .legend-swatch {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    border: 1.5px solid;
+  }
+  .legend-swatch.phase { background: var(--phase-2-bg); border-color: var(--phase-2-bar); }
+  .legend-swatch.decision { background: var(--decision-bg); border-color: var(--decision-border); }
+  .legend-swatch.resolved { background: var(--resolved-bg); border-color: var(--resolved-border); }
+  .legend-swatch.reopened { background: var(--reopened-bg); border-color: var(--reopened-border); }
+
+  /* ───────────── Example callout ───────────── */
+  .example {
+    margin-top: 32px;
+    background: #FAFBFC;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 28px;
+  }
+  .example-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .example-dialog {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 8px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .dialog-speaker {
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+    padding-top: 1px;
+  }
+  .dialog-speaker.reporter { color: #1E3A8A; }
+  .dialog-speaker.ai { color: var(--phase-1-text); }
+  .dialog-speaker.tech { color: var(--resolved-text); }
+  .dialog-line {
+    color: var(--text);
+  }
+  .dialog-line .sys {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: #F1F5F9;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: 1px;
+  }
+
+  /* ───────────── Footer note ───────────── */
+  .doc-foot {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="doc-header">
+    <div class="doc-eyebrow">SpeakFix AI · System Documentation</div>
+    <div class="doc-title">System Flow — The Closed-Loop Lifecycle</div>
+    <div class="doc-subtitle">
+      From the moment a user speaks to the moment a ticket is closed, every
+      step is recorded, verified, and reversible. A ticket is only "Resolved"
+      when the original reporter confirms the fix.
+    </div>
+  </div>
+
+  <!-- ───────────── Eight-stage pipeline banner ───────────── -->
+  <div class="pipeline">
+    <div class="pipeline-step">Voice</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Understand</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Classify</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Create</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Repair</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Document</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Verify</div>
+    <span class="pipeline-sep">→</span>
+    <div class="pipeline-step">Confirm</div>
+  </div>
+
+  <div class="canvas">
+
+    <!-- ───────────── Phase 1 — Report (Reporter + AI) ───────────── -->
+    <div class="phase-group phase-1">
+      <div class="phase-header">
+        <div class="phase-num">1</div>
+        <div class="phase-title">Report — the user speaks, SpeakFix listens</div>
+        <div class="phase-actor">Reporter · SpeakFix AI</div>
+      </div>
+      <div class="phase-steps">
+        <div class="phase-step"><span class="step-num">1</span>User signs up / logs in (Supabase Auth)</div>
+        <div class="phase-step"><span class="step-num">2</span>User reports a maintenance issue using voice</div>
+        <div class="phase-step"><span class="step-num">3</span>SpeakFix listens, transcribes, and understands the speech</div>
+        <div class="phase-step"><span class="step-num">4</span>SpeakFix asks follow-up questions if any details are missing</div>
+        <div class="phase-step"><span class="step-num">5</span>User confirms location and other details</div>
+      </div>
+    </div>
+
+    <div class="phase-arrow">↓</div>
+
+    <!-- ───────────── Phase 2 — Classify & Create (AI) ───────────── -->
+    <div class="phase-group phase-2">
+      <div class="phase-header">
+        <div class="phase-num">2</div>
+        <div class="phase-title">Understand, classify &amp; create the ticket</div>
+        <div class="phase-actor">SpeakFix AI</div>
+      </div>
+      <div class="phase-steps">
+        <div class="phase-step"><span class="step-num">6</span>Extract issue information (title, description, urgency reason)</div>
+        <div class="phase-step"><span class="step-num">7</span>Identify location from the conversation</div>
+        <div class="phase-step"><span class="step-num">8</span>Classify the issue category (HVAC, Electrical, Plumbing, AV Equipment, …)</div>
+        <div class="phase-step"><span class="step-num">9</span>Determine priority based on context (LOW / MEDIUM / HIGH / CRITICAL)</div>
+        <div class="phase-step"><span class="step-num">10</span>Detect similar / recurring incidents from real ticket history</div>
+        <div class="phase-step"><span class="step-num">11</span>Create the maintenance ticket (status: <strong>OPEN</strong>) and notify the reporter with the ticket number</div>
+        <div class="phase-step"><span class="step-num">12</span>Route the ticket to maintenance (administrator may assign to a technician)</div>
+      </div>
+    </div>
+
+    <div class="phase-arrow">↓</div>
+
+    <!-- ───────────── Phase 3 — Repair & Document (Technician + AI) ───────────── -->
+    <div class="phase-group phase-3">
+      <div class="phase-header">
+        <div class="phase-num">3</div>
+        <div class="phase-title">Repair, document &amp; submit for verification</div>
+        <div class="phase-actor">Maintenance Technician · SpeakFix AI</div>
+      </div>
+      <div class="phase-steps">
+        <div class="phase-step"><span class="step-num">13</span>Technician logs in and views assigned / incoming tickets</div>
+        <div class="phase-step"><span class="step-num">14</span>Technician reviews the issue, transcript, and similar-incident note</div>
+        <div class="phase-step"><span class="step-num">15</span>Technician starts work (status: <strong>IN_PROGRESS</strong>)</div>
+        <div class="phase-step"><span class="step-num">16</span>Technician records what was fixed — by voice (SpeakFix structures it) or typed</div>
+        <div class="phase-step"><span class="step-num">17</span>Submit resolution notes &amp; test / result</div>
+        <div class="phase-step"><span class="step-num">18</span>Submit evidence (photos, parts, checklist, voice notes)</div>
+        <div class="phase-step"><span class="step-num">19</span>SpeakFix performs a cautious AI-assisted resolution check (documentation completeness)</div>
+        <div class="phase-step"><span class="step-num">20</span>Submit for verification (status: <strong>AWAITING_VERIFICATION</strong>) — the ticket is <em>not</em> closed</div>
+      </div>
+    </div>
+
+    <div class="phase-arrow">↓</div>
+
+    <!-- ───────────── Phase 4 — Verify, confirm or reopen ───────────── -->
+    <div class="phase-group phase-4">
+      <div class="phase-header">
+        <div class="phase-num">4</div>
+        <div class="phase-title">Verify — SpeakFix asks the original reporter</div>
+        <div class="phase-actor">Reporter · SpeakFix AI</div>
+      </div>
+      <div class="phase-steps">
+        <div class="phase-step"><span class="step-num">21</span>SpeakFix contacts the original reporter (voice or dashboard): "The repair has been completed. Can you confirm the problem is actually fixed?"</div>
+      </div>
+    </div>
+
+    <!-- ───────────── Decision branch ───────────── -->
+    <div class="decision-block">
+      <div class="decision-question">
+        Reporter's answer?
+        <span class="quote">— "Is the problem actually fixed?"</span>
+      </div>
+
+      <div class="decision-branches">
+
+        <!-- YES branch -->
+        <div class="branch yes">
+          <div class="branch-label">YES — confirmed fixed</div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node">
+            <span class="node-sub">Status transition</span>
+            AWAITING_VERIFICATION → RESOLVED
+          </div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node terminal">
+            <span class="node-sub">Final state</span>
+            RESOLVED — USER CONFIRMED
+          </div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node" style="background:#F8FAFC; border-style:dashed;">
+            Ticket closed. Audit timeline records:<br>
+            REPORTER_CONFIRMED · timestamp · reporter's confirmation note
+          </div>
+        </div>
+
+        <!-- NO branch -->
+        <div class="branch no">
+          <div class="branch-label">NO — problem still exists</div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node">
+            <span class="node-sub">Status transition</span>
+            AWAITING_VERIFICATION → REOPENED
+          </div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node terminal">
+            <span class="node-sub">Reopen counter</span>
+            reopenCount++ · reporter's response recorded
+          </div>
+          <div class="branch-arrow">↓</div>
+          <div class="branch-node" style="background:#FEF2F2; border-color:rgba(239,68,68,0.4);">
+            <span class="node-sub">Loop back to</span>
+            Phase 3 — Maintenance works again
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────── Reopen loop explanation ───────────── -->
+      <div class="reopen-loop">
+        <div class="loop-title">↻ The closed loop</div>
+        <div class="loop-text">
+          After the ticket is reopened, the technician repairs the issue again,
+          submits a new resolution with evidence, and the ticket returns to
+          <strong>AWAITING_VERIFICATION</strong>. SpeakFix asks the reporter again.
+          The loop repeats until the reporter confirms — only then is the
+          ticket closed as <strong>RESOLVED — USER CONFIRMED</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────── Legend ───────────── -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-swatch phase"></div>Process phase</div>
+    <div class="legend-item"><div class="legend-swatch decision"></div>Decision point</div>
+    <div class="legend-item"><div class="legend-swatch resolved"></div>Resolved (reporter confirmed)</div>
+    <div class="legend-item"><div class="legend-swatch reopened"></div>Reopened (problem persists)</div>
+  </div>
+
+  <!-- ───────────── Worked example ───────────── -->
+  <div class="example">
+    <div class="example-title">Worked example — recurring HVAC leak in Building B</div>
+    <div class="example-dialog">
+      <div class="dialog-speaker reporter">Reporter</div>
+      <div class="dialog-line">"The air conditioner in Building B is leaking again."</div>
+
+      <div class="dialog-speaker ai">SpeakFix</div>
+      <div class="dialog-line">
+        <span class="sys">Extracted</span>Issue: Air conditioner leaking · Location: Building B · Category: HVAC
+      </div>
+      <div class="dialog-line">
+        <span class="sys">Recurring</span>3 similar past incidents in Building B detected — flagged as recurring.
+      </div>
+      <div class="dialog-line">
+        <span class="sys">Created</span>Ticket <strong>SF-2026-0143</strong> · priority MEDIUM · status OPEN
+      </div>
+
+      <div class="dialog-speaker tech">Technician</div>
+      <div class="dialog-line">"I repaired the drainage pipe and tested the unit. There is no more leaking."</div>
+
+      <div class="dialog-speaker ai">SpeakFix</div>
+      <div class="dialog-line">
+        <span class="sys">Recorded</span>Action · Resolution notes · Test performed · Test result · Evidence
+      </div>
+      <div class="dialog-line">
+        <span class="sys">Status</span>OPEN → IN_PROGRESS → <strong>AWAITING_VERIFICATION</strong>
+      </div>
+
+      <div class="dialog-speaker ai">SpeakFix → Reporter</div>
+      <div class="dialog-line">"The repair has been completed. Can you confirm the air conditioner is working correctly now?"</div>
+
+      <div class="dialog-speaker reporter">Reporter</div>
+      <div class="dialog-line">"No, it's still leaking."</div>
+
+      <div class="dialog-speaker ai">SpeakFix</div>
+      <div class="dialog-line">
+        <span class="sys">Status</span>AWAITING_VERIFICATION → <strong>REOPENED</strong> · reopenCount = 1 · maintenance notified
+      </div>
+
+      <div class="dialog-speaker tech">Technician (again)</div>
+      <div class="dialog-line">Repairs the actual cause, submits new resolution + evidence.</div>
+
+      <div class="dialog-speaker ai">SpeakFix → Reporter</div>
+      <div class="dialog-line">"The repair has been completed. Can you confirm the air conditioner is working now?"</div>
+
+      <div class="dialog-speaker reporter">Reporter</div>
+      <div class="dialog-line">"Yes, it's working now."</div>
+
+      <div class="dialog-speaker ai">SpeakFix</div>
+      <div class="dialog-line">
+        <span class="sys">Status</span>REOPENED → AWAITING_VERIFICATION → <strong>RESOLVED — USER CONFIRMED</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-foot">
+    A technician submitting a resolution does <strong>not</strong> close the ticket.
+    The ticket returns to <strong>AWAITING_VERIFICATION</strong>, and only the original
+    reporter's confirmation can transition it to <strong>RESOLVED</strong>. If the
+    reporter says the problem persists, the ticket is reopened and the loop runs
+    again. <strong>SpeakFix closes the loop.</strong>
+  </div>
+</div>
+</body>
+</html>
