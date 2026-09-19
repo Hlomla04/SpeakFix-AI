@@ -1,0 +1,10 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "functions": {
+    "src/app/api/agent/route.ts": { "maxDuration": 10 },
+    "src/app/api/transcribe/route.ts": { "maxDuration": 10 },
+    "src/app/api/tts/route.ts": { "maxDuration": 10 },
+    "src/app/api/auth/login/route.ts": { "maxDuration": 10 },
+    "src/app/api/auth/signup/route.ts": { "maxDuration": 10 }
+  }
+}

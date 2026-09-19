@@ -32,27 +32,20 @@ export const NVIDIA_MODEL = requireEnv("NVIDIA_MODEL");
 
 let client: OpenAI | null = null;
 
-/** Lazily create the OpenAI-compatible client pointing at NVIDIA's endpoint. */
+
 export function getNvidiaClient(): OpenAI {
   if (client) return client;
   client = new OpenAI({
     baseURL: NVIDIA_BASE_URL,
     apiKey: NVIDIA_API_KEY,
-    // The glm-5.3-flash model is fast for short prompts but the SpeakFix
-    // system prompt is long (~2k tokens of context + history). 90s gives
-    // the model enough time to think (reasoning_content) AND respond
-    // (content) without timing out.
+    
     timeout: 6_000,
     maxRetries: 1,
   });
   return client;
 }
 
-/**
- * Fallback to the z-ai-web-dev-sdk when NVIDIA is unavailable or slow.
- * This keeps the voice agent working even when the NVIDIA API is having
- * an outage. Returns the assistant's text response or "" on failure.
- */
+
 async function fallbackZaiChat(
   messages: { role: "system" | "user" | "assistant"; content: string }[]
 ): Promise<string> {
